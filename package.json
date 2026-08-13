@@ -1,0 +1,26 @@
+{
+  "name": "vanguard",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Helix runtime — server-authoritative browser multiplayer",
+  "workspaces": [
+    "shared",
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n authority,client -c cyan,magenta \"npm run dev -w @vanguard/server\" \"npm run dev -w @vanguard/client\"",
+    "dev:client": "npm run dev -w @vanguard/client",
+    "dev:server": "npm run dev -w @vanguard/server",
+    "build": "npm run build -w @vanguard/client && npm run build -w @vanguard/server",
+    "start": "npm run start -w @vanguard/server",
+    "smoke": "tsx scripts/stack_smoke.mjs && tsx scripts/live_smoke.mjs && tsx scripts/economy_smoke.mjs && tsx scripts/security_smoke.mjs && tsx scripts/audio_smoke.mjs && tsx scripts/ux_smoke.mjs && tsx scripts/social_smoke.mjs && tsx scripts/progress_smoke.mjs && tsx scripts/minds_smoke.mjs",
+    "test": "npm run smoke"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

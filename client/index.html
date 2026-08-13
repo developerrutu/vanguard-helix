@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#07080d" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Vanguard" />
+    <meta name="description" content="Vanguard — Orbit Trace competitive browser multiplayer" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/icon-180.png" />
+    <title>VANGUARD</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="view"></canvas>
+
+      <div id="boot" class="screen">
+        <div class="boot-mark" aria-hidden="true">
+          <svg viewBox="0 0 80 80">
+            <polygon points="40,6 72,24 72,56 40,74 8,56 8,24" fill="none" stroke="currentColor" stroke-width="2" />
+            <polyline points="40,18 56,28 56,50 40,60 24,50 24,28 40,18" fill="none" stroke="currentColor" stroke-width="1.6" />
+            <polyline points="28,46 40,22 52,46" fill="none" stroke="currentColor" stroke-width="2.4" />
+            <line x1="32" y1="40" x2="48" y2="40" stroke="currentColor" stroke-width="2.4" />
+          </svg>
+        </div>
+        <div class="boot-id">
+          <span class="eyebrow">HELIX RUNTIME 15.0 · ORBIT TRACE</span>
+          <h1>VANGUARD</h1>
+          <p class="sub">AUTHORITATIVE MULTIPLAYER CORE</p>
+        </div>
+        <ul id="boot-log" class="boot-log"></ul>
+        <div class="boot-bar"><div id="boot-fill"></div></div>
+        <div id="boot-status" class="boot-status">DETECTING HARDWARE…</div>
+      </div>
+
+      <div id="rotate" class="screen hidden">
+        <div class="rotate-card">
+          <div class="phone-icon"></div>
+          <h2 data-i18n="rotate_title">ROTATE DEVICE</h2>
+          <p data-i18n="rotate_body">Vanguard locks to landscape. Turn your device to continue.</p>
+        </div>
+      </div>
+
+      <div id="menu" class="screen hidden">
+        <div class="menu-veil"></div>
+        <header class="topbar">
+          <div class="brand">
+            <span class="logo-hex" aria-hidden="true">
+              <svg viewBox="0 0 36 36"><polygon points="18,2 33,10 33,26 18,34 3,26 3,10" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+            </span>
+            <div>
+              <strong>VANGUARD</strong>
+              <em>ORBIT TRACE // 4v4</em>
+            </div>
+          </div>
+          <div class="top-meta">
+            <span id="id-pill" class="pill mono">ID —</span>
+            <span id="region-pill" class="pill">REGION —</span>
+            <span id="ping-pill" class="pill ping-green">-- ms</span>
+            <span id="net-pill" class="pill">AUTHORITY OFFLINE</span>
+            <span id="fps-pill" class="pill mono">-- FPS</span>
+            <span id="input-pill" class="pill">KBM</span>
+          </div>
+        </header>
+
+        <div class="menu-layout">
+          <nav class="orbit-nav" aria-label="Main">
+            <button id="btn-start" class="nav-hex primary" data-i18n="nav_start">START GAME</button>
+            <button id="btn-profile" class="nav-hex" data-i18n="nav_profile">PROFILE</button>
+            <button id="btn-social" class="nav-hex" data-i18n="nav_friends">FRIENDS</button>
+            <button id="btn-clan" class="nav-hex" data-i18n="nav_clan">CLAN</button>
+            <button id="btn-inv" class="nav-hex" data-i18n="nav_inventory">INVENTORY</button>
+            <button id="btn-board" class="nav-hex" data-i18n="nav_board">LEADERBOARD</button>
+            <button id="btn-store" class="nav-hex" data-i18n="nav_store">STORE</button>
+            <button id="btn-mail" class="nav-hex" data-i18n="nav_mail">MAILBOX</button>
+            <button id="btn-settings" class="nav-hex" data-i18n="nav_settings">SETTINGS</button>
+          </nav>
+
+          <section class="menu-hero">
+            <p class="eyebrow" data-i18n="brand_sub">TEAM BATTLE ROYALE · 4 VS 4</p>
+            <h2>Easy to learn.<br />Brutal to master.</h2>
+            <p class="lede">
+              One life. Shared loot. A closing circle. Skill, positioning and teamwork decide the yard —
+              never a wallet. No pay-to-win. Ever.
+            </p>
+            <div class="cta-row">
+              <button id="btn-start-hero" class="btn primary" data-i18n="play_start">START GAME</button>
+              <button id="btn-range" class="btn ghost" data-i18n="nav_range">RANGE</button>
+            </div>
+            <div id="queue-note" class="queue-note hidden">SEARCHING FOR PLAYERS…</div>
+          </section>
+
+          <aside class="dossier hex-panel">
+            <h3>OPERATOR DOSSIER</h3>
+            <dl>
+              <div><dt data-i18n="nav_profile">CALLSIGN</dt><dd id="d-name">—</dd></div>
+              <div><dt data-i18n="player_id">PLAYER ID</dt><dd id="d-id" class="mono">—</dd></div>
+              <div><dt data-i18n="level">LEVEL</dt><dd id="d-level">1</dd></div>
+              <div><dt>TITLE</dt><dd id="d-title">ROOKIE</dd></div>
+              <div><dt data-i18n="rank">RANK</dt><dd id="d-rank">BRONZE</dd></div>
+              <div><dt data-i18n="live_season">SEASON</dt><dd id="d-season">ORBIT</dd></div>
+              <div><dt>HR</dt><dd id="d-mmr">1000</dd></div>
+              <div><dt>CLAN</dt><dd id="d-clan">—</dd></div>
+              <div><dt>ION</dt><dd id="d-soft">0</dd></div>
+              <div><dt>ORBIT</dt><dd id="d-hard">0</dd></div>
+              <div><dt>STATUS</dt><dd id="d-status">OFFLINE</dd></div>
+              <div><dt>W / L</dt><dd id="d-wl">0 / 0</dd></div>
+              <div><dt>K / D</dt><dd id="d-kd">0 / 0</dd></div>
+            </dl>
+            <div class="xp-track"><div id="d-xp-fill"></div></div>
+            <div class="party-strip" id="party-strip"></div>
+            <button id="btn-install" class="btn slim hidden">INSTALL PWA</button>
+          </aside>
+        </div>
+
+        <footer class="legal">ORBIT TRACE · S1 ORBIT LIVE · PUBLIC LAUNCH NOT OPEN · 30 Hz AUTHORITY · PWA READY</footer>
+      </div>
+
+      <div id="start" class="modal hidden">
+        <div class="panel start-panel hex-panel">
+          <header>
+            <div>
+              <p class="eyebrow">DEPLOY</p>
+              <h2 data-i18n="nav_start">START GAME</h2>
+            </div>
+            <button id="start-close" class="btn slim" data-i18n="close">CLOSE</button>
+          </header>
+          <div class="start-grid">
+            <label>MODE
+              <select id="start-mode">
+                <option value="quick">QUICK PLAY</option>
+                <option value="ranked">RANKED</option>
+                <option value="bots">PLAY WITH BOTS</option>
+              </select>
+            </label>
+            <div><span class="fine">PLAYLIST</span><strong id="start-map">IRON / SANDS / FROST ROTATION</strong></div>
+            <div><span class="fine">PARTY</span><strong id="start-party">SOLO</strong></div>
+            <div><span class="fine">SEATS</span><strong>8</strong></div>
+            <div><span class="fine">PING</span><strong id="start-ping">—</strong></div>
+          </div>
+          <div class="cta-row">
+            <button id="btn-go" class="btn primary" data-i18n="play_start">START GAME</button>
+            <button id="btn-ranked" class="btn ghost" data-i18n="play_ranked">RANKED</button>
+            <button id="btn-bots" class="btn ghost" data-i18n="play_bots">PLAY WITH BOTS</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="search" class="modal hidden">
+        <div class="panel slim-panel search-panel hex-panel">
+          <p class="eyebrow">MATCHMAKING</p>
+          <h2 data-i18n="search_title">SEARCHING FOR PLAYERS…</h2>
+          <div class="search-meter"><i id="search-fill"></i></div>
+          <dl class="search-dl">
+            <div><dt data-i18n="search_found">PLAYERS FOUND</dt><dd id="s-found">1 / 8</dd></div>
+            <div><dt data-i18n="search_team">TEAM STATUS</dt><dd id="s-mix">1 / 7</dd></div>
+            <div><dt>REGION</dt><dd id="s-region">INDIA</dd></div>
+            <div><dt data-i18n="search_ping">EST. PING</dt><dd id="s-ping">—</dd></div>
+            <div><dt data-i18n="search_wait">SEARCH TIME</dt><dd id="s-eta">0:08</dd></div>
+          </dl>
+          <p id="s-note" class="fine"></p>
+          <div id="s-alt" class="cta-row center-row hidden">
+            <button id="btn-alt-quick" class="btn primary">PLAY QUICK</button>
+            <button id="btn-alt-bots" class="btn ghost">PLAY WITH BOTS</button>
+          </div>
+          <button id="btn-cancel-search" class="btn ghost" data-i18n="search_cancel">CANCEL</button>
+        </div>
+      </div>
+
+      <div id="found" class="modal hidden">
+        <div class="panel slim-panel hex-panel found-pop">
+          <p class="eyebrow">READY UP</p>
+          <h2 data-i18n="found_title">MATCH FOUND</h2>
+          <p id="found-meta" class="lede center">4v4 · INDIA</p>
+          <div class="accept-count" id="found-clock">10</div>
+          <div class="cta-row center-row">
+            <button id="btn-accept" class="btn primary" data-i18n="found_accept">ACCEPT</button>
+            <button id="btn-decline" class="btn ghost" data-i18n="found_decline">DECLINE</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="lobby" class="modal hidden">
+        <div class="panel lobby-panel hex-panel">
+          <header>
+            <div>
+              <p class="eyebrow" data-i18n="lobby_title">BATTLE LOBBY</p>
+              <h2>DEPLOY IN <span id="lobby-clock">30</span></h2>
+            </div>
+            <button id="btn-lobby-ready" class="btn primary" data-i18n="lobby_ready">READY</button>
+          </header>
+          <div class="teams" id="lobby-teams"></div>
+          <div class="chars" id="char-picks"></div>
+        </div>
+      </div>
+
+      <div id="result" class="modal hidden">
+        <div class="panel lobby-panel hex-panel">
+          <header>
+            <div>
+              <p class="eyebrow">MATCH COMPLETE</p>
+              <h2 id="result-title">ALPHA WINS</h2>
+              <p id="result-sub" class="lede">MVP —</p>
+            </div>
+            <button id="btn-result-ok" class="btn primary" data-i18n="result_ok">RETURN TO LOBBY</button>
+          </header>
+          <div id="result-table" class="result-table"></div>
+          <p id="result-reward" class="fine"></p>
+          <div class="cta-row">
+            <button id="btn-again" class="btn ghost" data-i18n="result_again">PLAY AGAIN</button>
+            <button id="btn-invite-end" class="btn ghost">INVITE SQUAD</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="loading" class="modal hidden">
+        <div class="panel slim-panel hex-panel">
+          <p class="eyebrow" id="load-map">ORBIT YARD</p>
+          <h2>DEPLOYING</h2>
+          <p id="load-tip" class="lede center">Equal start. No store. Loot the yard.</p>
+          <div class="search-meter"><i id="load-fill"></i></div>
+        </div>
+      </div>
+
+      <div id="intro" class="modal hidden">
+        <div class="intro-stage">
+          <p class="eyebrow" id="intro-match">MATCH #2401</p>
+          <h2 id="intro-map">ORBIT YARD</h2>
+          <div class="intro-teams">
+            <div class="banner alpha" id="intro-alpha"></div>
+            <div class="vs">VS</div>
+            <div class="banner bravo" id="intro-bravo"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="social" class="modal hidden">
+        <div class="panel lobby-panel social-panel hex-panel">
+          <header>
+            <div>
+              <p class="eyebrow">COMMUNITY</p>
+              <h2>SQUAD / SOCIAL</h2>
+            </div>
+            <button id="social-close" class="btn slim" data-i18n="close">CLOSE</button>
+          </header>
+          <div id="soc-tabs" class="soc-tabs">
+            <button class="btn slim on" data-soc="party">PARTY</button>
+            <button class="btn slim" data-soc="friends">FRIENDS</button>
+            <button class="btn slim" data-soc="find">FIND</button>
+            <button class="btn slim" data-soc="clan">CLAN</button>
+            <button class="btn slim" data-soc="recent">RECENT</button>
+            <button class="btn slim" data-soc="safety">SAFETY</button>
+          </div>
+          <div id="soc-party" class="soc-pane">
+            <div id="party-list" class="list"></div>
+            <div class="inline">
+              <select id="party-mode">
+                <option value="quick">QUICK</option>
+                <option value="ranked">RANKED</option>
+                <option value="bots">BOTS</option>
+              </select>
+              <button id="btn-party-mode" class="btn slim">SET MODE</button>
+              <button id="btn-party-leave" class="btn slim">LEAVE</button>
+            </div>
+            <div class="inline">
+              <input id="party-chat" maxlength="160" placeholder="PARTY CHAT" />
+              <button id="btn-party-chat" class="btn slim">SEND</button>
+            </div>
+            <div id="party-log" class="chat-log"></div>
+          </div>
+          <div id="soc-friends" class="soc-pane hidden">
+            <div class="inline wrap">
+              <button class="btn slim on" data-ff="all">ALL</button>
+              <button class="btn slim" data-ff="online">ONLINE</button>
+              <button class="btn slim" data-ff="offline">OFFLINE</button>
+              <button class="btn slim" data-ff="match">IN MATCH</button>
+              <button class="btn slim" data-ff="free">AVAILABLE</button>
+              <button class="btn slim" data-ff="fav">FAVORITES</button>
+            </div>
+            <div id="friend-list" class="list"></div>
+            <div id="req-list" class="list"></div>
+            <div class="inline">
+              <input id="friend-name" maxlength="24" placeholder="CALLSIGN OR PLAYER ID" />
+              <button id="btn-add-friend" class="btn slim">REQUEST</button>
+            </div>
+          </div>
+          <div id="soc-find" class="soc-pane hidden">
+            <div class="inline">
+              <input id="find-q" maxlength="32" placeholder="SEARCH ID OR CALLSIGN" />
+              <button id="btn-find" class="btn slim">SEARCH</button>
+            </div>
+            <div id="find-list" class="list"></div>
+            <h3>SUGGESTED</h3>
+            <div id="suggest-list" class="list"></div>
+          </div>
+          <div id="soc-clan" class="soc-pane hidden">
+            <div id="clan-card" class="fine">NO CLAN</div>
+            <div id="clan-list" class="list"></div>
+            <div class="inline">
+              <input id="clan-tag" maxlength="4" placeholder="TAG" />
+              <input id="clan-name" maxlength="24" placeholder="CLAN NAME" />
+              <button id="btn-clan-make" class="btn slim">FOUND</button>
+            </div>
+            <div class="inline">
+              <input id="clan-announce" maxlength="160" placeholder="ANNOUNCEMENT" />
+              <button id="btn-clan-announce" class="btn slim">POST</button>
+              <button id="btn-clan-leave" class="btn slim">LEAVE</button>
+            </div>
+            <div class="inline">
+              <input id="clan-chat" maxlength="160" placeholder="CLAN CHAT" />
+              <button id="btn-clan-chat" class="btn slim">SEND</button>
+            </div>
+          </div>
+          <div id="soc-recent" class="soc-pane hidden">
+            <div id="recent-list" class="list"></div>
+          </div>
+          <div id="soc-safety" class="soc-pane hidden">
+            <div id="block-list" class="list"></div>
+            <label class="fine">INVITES
+              <select id="priv-invites">
+                <option value="anyone">ANYONE</option>
+                <option value="friends" selected>FRIENDS</option>
+                <option value="clan">CLAN</option>
+                <option value="nobody">NOBODY</option>
+              </select>
+            </label>
+            <label class="fine">WHISPERS
+              <select id="priv-whispers">
+                <option value="anyone">ANYONE</option>
+                <option value="friends" selected>FRIENDS</option>
+                <option value="clan">CLAN</option>
+                <option value="nobody">NOBODY</option>
+              </select>
+            </label>
+            <label class="check fine"><input id="priv-online" type="checkbox" checked /> SHOW ONLINE</label>
+            <label class="check fine"><input id="priv-match" type="checkbox" checked /> SHOW MATCH</label>
+            <label class="check fine"><input id="priv-friends" type="checkbox" /> SHOW FRIEND LIST</label>
+            <div class="inline">
+              <select id="set-presence">
+                <option value="online">ONLINE</option>
+                <option value="lobby">LOBBY</option>
+                <option value="away">AWAY</option>
+                <option value="dnd">DND</option>
+                <option value="offline">HIDDEN</option>
+              </select>
+              <button id="btn-presence" class="btn slim">SET PRESENCE</button>
+              <button id="btn-privacy" class="btn slim">SAVE PRIVACY</button>
+            </div>
+            <div class="inline">
+              <input id="report-id" maxlength="32" placeholder="PLAYER ID" />
+              <select id="report-reason">
+                <option value="cheat">CHEAT</option>
+                <option value="harass">HARASS</option>
+                <option value="language">LANGUAGE</option>
+                <option value="grief">GRIEF</option>
+                <option value="exploit">EXPLOIT</option>
+                <option value="name">NAME</option>
+                <option value="hate">HATE</option>
+                <option value="clan">CLAN</option>
+                <option value="spam">SPAM</option>
+                <option value="other">OTHER</option>
+              </select>
+              <button id="btn-report" class="btn slim">REPORT</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="barracks" class="modal hidden">
+        <div class="panel lobby-panel hex-panel">
+          <header>
+            <h2>PROFILE / BARRACKS</h2>
+            <button id="barracks-close" class="btn slim">CLOSE</button>
+          </header>
+          <div id="br-tabs" class="soc-tabs">
+            <button class="btn slim on" data-tab="ops">OPERATORS</button>
+            <button class="btn slim" data-tab="career">CAREER</button>
+            <button class="btn slim" data-tab="challenges">CHALLENGES</button>
+            <button class="btn slim" data-tab="boards">BOARDS</button>
+          </div>
+          <div id="tab-ops">
+            <div id="op-grid" class="op-grid"></div>
+            <div id="cosmetic-grid" class="grid"></div>
+            <div id="ach-list" class="fine"></div>
+            <div id="hist-list" class="list"></div>
+            <button id="btn-prestige" class="btn slim hidden">PRESTIGE</button>
+          </div>
+          <div id="tab-career" class="hidden"><div id="career-card" class="fine"></div></div>
+          <div id="tab-challenges" class="hidden"><div id="chal-list" class="list"></div></div>
+          <div id="tab-boards" class="hidden">
+            <div id="board-scopes" class="inline wrap">
+              <button class="btn slim" data-scope="global">GLOBAL</button>
+              <button class="btn slim" data-scope="region">REGION</button>
+              <button class="btn slim" data-scope="friends">FRIENDS</button>
+              <button class="btn slim" data-scope="clan">CLAN</button>
+            </div>
+            <div id="board-list" class="list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="inventory" class="modal hidden">
+        <div class="panel hex-panel">
+          <header><h2>INVENTORY</h2><button id="inv-close" class="btn slim">CLOSE</button></header>
+          <p class="fine">Kits and plates. Combat power is never sold.</p>
+          <div id="inv-grid" class="list"></div>
+        </div>
+      </div>
+
+      <div id="store" class="modal hidden">
+        <div class="panel lobby-panel hex-panel">
+          <header>
+            <div>
+              <p class="eyebrow">COSMETIC ONLY</p>
+              <h2>ORBIT VAULT</h2>
+            </div>
+            <button id="store-close" class="btn slim">CLOSE</button>
+          </header>
+          <p class="fine" data-i18n="store_rule">Orbit Vault is appearance only. Nothing here changes damage, health, or speed.</p>
+          <div class="inline wrap">
+            <span class="chip" id="store-ion">ION 0</span>
+            <span class="chip" id="store-orbit">ORBIT 0</span>
+            <button id="btn-daily" class="btn slim">CLAIM DAILY</button>
+          </div>
+          <div id="store-tabs" class="soc-tabs">
+            <button class="btn slim on" data-lane="featured">FEATURED</button>
+            <button class="btn slim" data-lane="operators">OPERATORS</button>
+            <button class="btn slim" data-lane="weapons">WEAPONS</button>
+            <button class="btn slim" data-lane="emotes">EMOTES</button>
+            <button class="btn slim" data-lane="banners">BANNERS</button>
+            <button class="btn slim" data-lane="effects">EFFECTS</button>
+            <button class="btn slim" data-lane="bundles">BUNDLES</button>
+            <button class="btn slim" data-lane="pass">PASS</button>
+          </div>
+          <div id="store-grid" class="op-grid"></div>
+          <div id="store-quote" class="fine">Select an item. The quote shows currency, total, and that it is cosmetic.</div>
+        </div>
+      </div>
+
+      <div id="mailbox" class="modal hidden">
+        <div class="panel hex-panel">
+          <header><h2>MAILBOX</h2><button id="mail-close" class="btn slim">CLOSE</button></header>
+          <div id="mail-tabs" class="soc-tabs">
+            <button class="btn slim on" data-mail="friends">FRIENDS</button>
+            <button class="btn slim" data-mail="clan">CLAN</button>
+            <button class="btn slim" data-mail="match">MATCH</button>
+            <button class="btn slim" data-mail="rewards">REWARDS</button>
+            <button class="btn slim" data-mail="system">SYSTEM</button>
+            <button class="btn slim" data-mail="live">LIVE</button>
+            <button class="btn slim" data-mail="notes">NOTES</button>
+          </div>
+          <div id="mail-list" class="list"></div>
+        </div>
+      </div>
+
+      <div id="welcome" class="modal hidden">
+        <div class="panel slim-panel hex-panel">
+          <h2>WELCOME BACK</h2>
+          <p id="welcome-body" class="lede">Dailies are up.</p>
+          <button id="btn-welcome-ok" class="btn primary">CONTINUE</button>
+        </div>
+      </div>
+
+      <div id="fault" class="modal hidden">
+        <div class="panel slim-panel hex-panel">
+          <p class="eyebrow">SIGNAL</p>
+          <h2 id="fault-title">Connection lost</h2>
+          <p id="fault-body" class="lede">The authority link dropped. You can retry without losing your operator.</p>
+          <div class="cta-row center-row">
+            <button id="fault-retry" class="btn primary">RETRY</button>
+            <button id="fault-recon" class="btn ghost">RECONNECT</button>
+            <button id="fault-lobby" class="btn ghost">RETURN TO LOBBY</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="invites" class="invites"></div>
+      <div id="toasts" class="toasts" aria-live="polite"></div>
+
+      <div id="reconnect" class="modal hidden">
+        <div class="panel slim-panel hex-panel">
+          <h2>RECONNECTING</h2>
+          <p>Slot reserved for 5 minutes. Restoring authority link…</p>
+        </div>
+      </div>
+
+      <div id="hud" class="hud hidden">
+        <div class="crosshair" id="crosshair"><i></i><i></i><i></i><i></i></div>
+        <div id="hitmarker" class="hitmarker"></div>
+        <div id="hurt" class="hurt"></div>
+        <div id="dmg-dir" class="dmg-dir"></div>
+
+        <div class="hud-tl">
+          <div class="bars">
+            <div class="bar hp"><span id="hp-fill"></span></div>
+            <div class="bar ar"><span id="ar-fill"></span></div>
+          </div>
+          <div class="hud-readout">
+            <span id="hp-num">100</span><span class="dim">/ 100 HP</span>
+            <span id="ar-num">0</span><span class="dim">AR</span>
+          </div>
+        </div>
+
+        <div class="hud-score" id="hud-score">
+          <span class="alpha" id="score-a">0</span>
+          <em id="score-clock">LIVE</em>
+          <span class="bravo" id="score-b">0</span>
+        </div>
+        <div id="zone-chip" class="zone-chip"></div>
+        <div id="compass" class="compass"></div>
+
+        <div class="hud-tr mono">
+          <div id="hud-fps">60 FPS</div>
+          <div id="hud-net">-- ms · 30 TICK</div>
+          <div id="hud-qual">EXCELLENT</div>
+          <div id="hud-pos">0.0  0.0</div>
+        </div>
+
+        <div id="squad" class="squad"></div>
+        <canvas id="minimap" width="132" height="132"></canvas>
+
+        <div class="hud-bl">
+          <div class="inv" id="inv-slots"></div>
+          <div class="credits"><em>ION</em> <span id="hud-soft">0</span> · <em>OR</em> <span id="hud-hard">0</span></div>
+        </div>
+
+        <div class="hud-br">
+          <div class="weapon">
+            <strong>STITCH</strong>
+            <span id="hud-ammo">24 / 72</span>
+            <span id="hud-nade">FRAG ×2</span>
+          </div>
+        </div>
+
+        <div id="loadout" class="loadout"></div>
+        <div id="announce" class="announce"></div>
+        <div id="killfeed" class="killfeed"></div>
+        <div id="killcard" class="killcard"></div>
+        <div id="comms" class="comms"></div>
+        <div id="downed" class="downed hidden">DOWNED — CRAWL OR WAIT</div>
+        <div id="scoreboard" class="scoreboard hidden"></div>
+        <div class="hint" id="hint"></div>
+      </div>
+
+      <div id="touch" class="touch hidden">
+        <div id="stick" class="stick"><div id="stick-knob" class="knob"></div></div>
+        <div id="lookpad" class="lookpad"></div>
+        <div class="actions" id="touch-actions">
+          <button data-act="jump" class="act">JUMP</button>
+          <button data-act="sprint" class="act">SPRINT</button>
+          <button data-act="interact" class="act">TAKE</button>
+          <button data-act="reload" class="act">RELOAD</button>
+          <button data-act="nade" class="act">FRAG</button>
+          <button data-act="ping" class="act">PING</button>
+          <button data-act="swap" class="act">SWAP</button>
+          <button data-act="aim" class="act">ADS</button>
+          <button data-act="crouch" class="act">CROUCH</button>
+          <button data-act="prone" class="act">PRONE</button>
+          <button data-act="use" class="act wide">HEAL</button>
+          <button data-act="fire" class="act fire">FIRE</button>
+        </div>
+      </div>
+
+      <div id="settings" class="modal hidden">
+        <div class="panel settings-panel hex-panel">
+          <header>
+            <h2>SYSTEMS</h2>
+            <button id="settings-close" class="btn slim">CLOSE</button>
+          </header>
+          <div id="set-tabs" class="soc-tabs">
+            <button class="btn slim on" data-set="gfx">GRAPHICS</button>
+            <button class="btn slim" data-set="audio">AUDIO</button>
+            <button class="btn slim" data-set="controls">CONTROLS</button>
+            <button class="btn slim" data-set="game">GAMEPLAY</button>
+            <button class="btn slim" data-set="access">ACCESS</button>
+            <button class="btn slim" data-set="account">ACCOUNT</button>
+          </div>
+          <div id="set-gfx" class="set-pane grid">
+            <label>Preset
+              <select id="set-quality">
+                <option value="auto">AUTO OPTIMIZE</option>
+                <option value="potato">VERY LOW</option>
+                <option value="low">LOW</option>
+                <option value="medium">MEDIUM</option>
+                <option value="high">HIGH</option>
+                <option value="ultra">VERY HIGH</option>
+              </select>
+            </label>
+            <label>Frame cap
+              <select id="set-fps">
+                <option value="0">UNCAPPED</option>
+                <option value="30">30</option>
+                <option value="60">60</option>
+                <option value="90">90</option>
+                <option value="120">120</option>
+              </select>
+            </label>
+            <label>Resolution scale
+              <input id="set-res" type="range" min="0.6" max="1.4" step="0.05" />
+            </label>
+            <label class="check"><input id="set-aa" type="checkbox" checked /> Anti-aliasing</label>
+            <label class="check"><input id="set-fps-show" type="checkbox" checked /> Show FPS / net</label>
+            <label class="check"><input id="set-fullscreen" type="checkbox" /> Prefer fullscreen</label>
+          </div>
+          <div id="set-audio" class="set-pane grid hidden">
+            <label>Master <input id="set-master" type="range" min="0" max="1" step="0.01" /></label>
+            <label>Music <input id="set-music" type="range" min="0" max="1" step="0.01" /></label>
+            <label>SFX <input id="set-sfx" type="range" min="0" max="1" step="0.01" /></label>
+            <label>UI <input id="set-uivol" type="range" min="0" max="1" step="0.01" /></label>
+            <label>Voice <input id="set-voice" type="range" min="0" max="1" step="0.01" /></label>
+            <label>Weapons <input id="set-weapon" type="range" min="0" max="1" step="0.01" /></label>
+            <label>Environment <input id="set-env" type="range" min="0" max="1" step="0.01" /></label>
+            <label>Character <input id="set-charvol" type="range" min="0" max="1" step="0.01" /></label>
+            <label>Voice chat <input id="set-chatvol" type="range" min="0" max="1" step="0.01" /></label>
+            <label>Spatial 3D <input id="set-spatial" type="checkbox" /></label>
+            <label>Mono <input id="set-mono" type="checkbox" /></label>
+            <label>Character VO <input id="set-charvoice" type="checkbox" /></label>
+          </div>
+          <div id="set-controls" class="set-pane grid hidden">
+            <label>Look sensitivity <input id="set-sens" type="range" min="0.3" max="2.4" step="0.05" /></label>
+            <label>ADS sensitivity <input id="set-ads" type="range" min="0.3" max="1.6" step="0.05" /></label>
+            <label>Stick sensitivity <input id="set-stick" type="range" min="0.4" max="2" step="0.05" /></label>
+            <label class="check"><input id="set-invert" type="checkbox" /> Invert look Y</label>
+            <label class="check"><input id="set-gyro" type="checkbox" /> Gyroscope aim</label>
+            <label class="check"><input id="set-rumble" type="checkbox" checked /> Controller rumble</label>
+            <label class="check"><input id="set-left" type="checkbox" /> Left-handed layout</label>
+            <div class="inline wrap">
+              <button id="btn-touch-std" class="btn slim">STANDARD</button>
+              <button id="btn-touch-adv" class="btn slim">ADVANCED</button>
+              <button id="btn-touch-left" class="btn slim">LEFT-HANDED</button>
+            </div>
+            <div id="bind-list" class="list"></div>
+          </div>
+          <div id="set-game" class="set-pane grid hidden">
+            <label class="check"><input id="set-hits" type="checkbox" checked /> Hit markers</label>
+            <label class="check"><input id="set-dmg" type="checkbox" checked /> Damage numbers</label>
+            <label class="check"><input id="set-autosprint" type="checkbox" /> Auto sprint</label>
+            <label class="check"><input id="set-autopick" type="checkbox" /> Auto pickup</label>
+          </div>
+          <div id="set-access" class="set-pane grid hidden">
+            <label>Language
+              <select id="set-lang">
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+              </select>
+            </label>
+            <label>Colorblind
+              <select id="set-cb">
+                <option value="none">OFF</option>
+                <option value="protan">PROTAN</option>
+                <option value="deutan">DEUTAN</option>
+                <option value="tritan">TRITAN</option>
+              </select>
+            </label>
+            <label>UI scale <input id="set-uiscale" type="range" min="0.8" max="1.3" step="0.05" /></label>
+            <label>Text size <input id="set-text" type="range" min="0.85" max="1.3" step="0.05" /></label>
+            <label class="check"><input id="set-contrast" type="checkbox" /> High contrast</label>
+            <label class="check"><input id="set-noshake" type="checkbox" /> Reduce screen shake</label>
+            <label class="check"><input id="set-noflash" type="checkbox" /> Reduce flash</label>
+            <label class="check"><input id="set-subs" type="checkbox" /> Subtitles</label>
+          </div>
+          <div id="set-account" class="set-pane grid hidden">
+            <p class="fine" id="acct-status">GUEST SESSION — claim with email to lock the id.</p>
+            <label>Email <input id="acct-email" type="email" autocomplete="username" /></label>
+            <label>Password <input id="acct-pass" type="password" autocomplete="current-password" /></label>
+            <div class="inline wrap">
+              <button id="btn-acct-register" class="btn slim primary">REGISTER / CLAIM</button>
+              <button id="btn-acct-login" class="btn slim">LOGIN</button>
+              <button id="btn-acct-logout" class="btn slim">LOGOUT</button>
+            </div>
+            <div class="inline wrap">
+              <button id="btn-acct-recover" class="btn slim">RECOVERY CODE</button>
+              <button id="btn-acct-export" class="btn slim">EXPORT DATA</button>
+              <button id="btn-acct-delete" class="btn slim">DELETE ACCOUNT</button>
+            </div>
+            <p class="fine" id="acct-note">Passwords never sit in browser storage. The token is opaque and server-revocable.</p>
+            <div id="acct-sessions" class="list"></div>
+          </div>
+          <p class="fine" id="cap-summary"></p>
+        </div>
+      </div>
+
+      <div id="pause" class="modal hidden">
+        <div class="panel slim-panel hex-panel">
+          <h2 data-i18n="pause_title">PAUSED</h2>
+          <p data-i18n="pause_body">Authority is still simulating. You are still in the room.</p>
+          <div class="cta-row">
+            <button id="btn-resume" class="btn primary">RESUME</button>
+            <button id="btn-leave" class="btn ghost">LEAVE MATCH</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

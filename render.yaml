@@ -1,0 +1,17 @@
+# One-box playable host. Not Vercel — this process is HTTP + WebSocket + 30 Hz sim.
+services:
+  - type: web
+    name: vanguard
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: HELIX_ENV
+        value: prod
+      - key: HOST
+        value: 0.0.0.0
+      - key: NODE_VERSION
+        value: "20"
