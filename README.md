@@ -2,6 +2,8 @@
 
 Browser-native, **server-authoritative** 4v4 competitive shooter. Dedicated regions. No peer-to-peer.
 
+**Built by [developerrutu](https://github.com/developerrutu).** Full A–Z record: [`GAME_OVERVIEW.md`](GAME_OVERVIEW.md).
+
 ## Quick start
 
 ```bash
