@@ -171,10 +171,10 @@ export class GameRenderer {
         this.players.set(p.id, a);
         this.scene.add(a.root);
       }
-      const target = new THREE.Vector3(p.x, p.y, p.z);
-      if (p.id === this.localId) a.root.position.copy(target);
-      else a.root.position.lerp(target, 0.35);
-      a.root.rotation.y = p.yaw;
+      if (p.id !== this.localId) {
+        a.root.position.lerp(new THREE.Vector3(p.x, p.y, p.z), 0.35);
+        a.root.rotation.y = p.yaw;
+      }
       const hiddenBySmoke = p.id !== this.localId && this.lineInSmoke(you.x, you.z, p.x, p.z);
       a.root.visible = (p.alive || p.downed) && !p.eliminated && !hiddenBySmoke;
       a.root.scale.y = p.downed ? 0.35 : 1;
@@ -300,17 +300,18 @@ export class GameRenderer {
       const oy = height + Math.sin(this.camPitch) * 1.2;
       const lookY = you.stance === "prone" ? 0.35 : you.stance === "crouch" ? 0.85 : 1.15;
       const target = new THREE.Vector3(you.x, you.y + lookY, you.z);
-      const desired = new THREE.Vector3(you.x + ox, you.y + oy, you.z + oz);
-      this.camera.position.lerp(desired, 1 - Math.exp(-10 * dt));
+      this.camera.position.set(you.x + ox, you.y + oy, you.z + oz);
       if (this.shake > 0 && !this.reduceShake) {
-        this.camera.position.x += (Math.random() - 0.5) * this.shake;
-        this.camera.position.y += (Math.random() - 0.5) * this.shake * 0.6;
-        this.shake *= 0.82;
-      } else this.shake *= 0.7;
+        this.camera.position.x += (Math.random() - 0.5) * this.shake * 0.2;
+        this.camera.position.y += (Math.random() - 0.5) * this.shake * 0.12;
+        this.shake *= 0.6;
+      } else this.shake *= 0.45;
       this.camera.lookAt(target);
       const self = this.players.get(you.id);
       if (self) {
         self.root.visible = true;
+        self.root.position.set(you.x, you.y, you.z);
+        self.root.rotation.y = you.yaw;
         this.pose(self, you, dt);
       }
     }

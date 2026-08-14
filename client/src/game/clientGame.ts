@@ -192,8 +192,21 @@ export class ClientGame {
     }
   }
 
+  useMap(mapId: string): void {
+    this.map = mapId && mapId !== "range" ? liveMap(worldById(mapId)) : TRAINING_RANGE;
+  }
+
   private reconcile(snap: Snapshot): void {
     this.pending = this.pending.filter((p) => p.input.seq > snap.ack);
+    const err = Math.hypot(this.predicted.x - snap.you.x, this.predicted.z - snap.you.z);
+    if (err < 0.55) {
+      this.predicted.vx = snap.you.vx;
+      this.predicted.vz = snap.you.vz;
+      this.predicted.y = snap.you.y;
+      this.predicted.stance = snap.you.stance || this.predicted.stance;
+      this.predicted.loco = snap.you.loco || this.predicted.loco;
+      return;
+    }
     this.predicted.x = snap.you.x;
     this.predicted.y = snap.you.y;
     this.predicted.z = snap.you.z;
@@ -244,7 +257,7 @@ export class ClientGame {
         const id = you?.weaponId || "stitch";
         if (you && you.ammo <= 0) this.audio.dry();
         else this.audio.fire(id, weaponById(id).class, you?.x || 0, you?.y || 0, you?.z || 0, 0, false, false);
-        this.render.impulse(you?.ads ? 0.045 : 0.08);
+        this.render.impulse(you?.ads ? 0.02 : 0.035);
       }
       applyInput(this.predicted, frame, this.map);
       this.pending.push({ input: frame, body: copyBody(this.predicted) });

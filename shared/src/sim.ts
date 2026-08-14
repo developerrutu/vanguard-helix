@@ -74,8 +74,8 @@ export function applyInput(body: Body, input: InputPayload, map: MapData): void 
   const dt = clamp(input.dt, 0.004, 0.05);
   const mx = clamp(input.moveX, -1, 1);
   const my = clamp(input.moveY, -1, 1);
-  const lookX = clamp(input.lookX, -1.5, 1.5);
-  const lookY = clamp(input.lookY, -1.5, 1.5);
+  const lookX = clamp(input.lookX, -2.4, 2.4);
+  const lookY = clamp(input.lookY, -2.4, 2.4);
   const wasAir = !body.grounded;
   body.landDrop = 0;
 

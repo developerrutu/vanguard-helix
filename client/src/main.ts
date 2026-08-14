@@ -280,6 +280,7 @@ function wireNet(): void {
   net.onIntro = (info) => {
     ui.showIntro(info);
     renderer?.useWorld(info.mapId || "iron_city", (info.weather as "clear") || "clear");
+    game?.useMap(info.mapId || "iron_city");
   };
   net.onChat = (from, text) => ui.chatLine(from, text);
 }

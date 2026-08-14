@@ -34,17 +34,39 @@ export async function enterPlayDisplay(): Promise<void> {
   await requestLandscape();
 }
 
+/** Pin the HUD/touch layer to the visual viewport so taps hit the buttons you see. */
+export function fitOverlay(el: HTMLElement | null): void {
+  if (!el) return;
+  const vv = window.visualViewport;
+  if (!vv) {
+    el.style.inset = "0";
+    el.style.width = "100%";
+    el.style.height = "100%";
+    return;
+  }
+  el.style.top = `${vv.offsetTop}px`;
+  el.style.left = `${vv.offsetLeft}px`;
+  el.style.right = "auto";
+  el.style.bottom = "auto";
+  el.style.width = `${vv.width}px`;
+  el.style.height = `${vv.height}px`;
+}
+
 export function bindDisplayGates(opts: {
   rotateEl: HTMLElement;
   preferFullscreen: () => boolean;
 }): () => void {
   const sync = () => {
     opts.rotateEl.classList.toggle("hidden", !isPortraitMobile());
+    fitOverlay(document.getElementById("touch"));
+    fitOverlay(document.getElementById("hud"));
   };
   sync();
   const onResize = () => sync();
   window.addEventListener("resize", onResize);
   window.addEventListener("orientationchange", onResize);
+  window.visualViewport?.addEventListener("resize", onResize);
+  window.visualViewport?.addEventListener("scroll", onResize);
 
   const onFirst = async () => {
     if (opts.preferFullscreen()) await requestFullscreen();

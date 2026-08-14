@@ -307,6 +307,8 @@ export class InputManager {
     stick.addEventListener("pointercancel", endStick);
 
     look.addEventListener("pointerdown", (e) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.closest("[data-act], #stick")) return;
       lookId = e.pointerId;
       lookLastX = e.clientX;
       lookLastY = e.clientY;
@@ -319,8 +321,8 @@ export class InputManager {
       lookLastX = e.clientX;
       lookLastY = e.clientY;
       const ads = this.ads ? this.adsSens : 1;
-      this.lookAccX += dx * 0.007 * this.sensitivity * ads;
-      const y = dy * 0.007 * this.sensitivity * ads;
+      this.lookAccX += dx * 0.006 * this.sensitivity * ads;
+      const y = dy * 0.006 * this.sensitivity * ads;
       this.lookAccY += this.invertY ? -y : y;
     });
     const endLook = () => {
@@ -350,14 +352,22 @@ export class InputManager {
       };
       const bit = map[act];
       if (!bit) return;
-      const down = (e: Event) => {
+      let pid: number | null = null;
+      const down = (e: PointerEvent) => {
         e.preventDefault();
+        e.stopPropagation();
+        this.device = "touch";
+        pid = e.pointerId;
+        btn.setPointerCapture(e.pointerId);
         this.setBtn(bit, true);
       };
-      const up = () => this.setBtn(bit, false);
+      const up = (e: PointerEvent) => {
+        if (pid !== null && e.pointerId !== pid) return;
+        pid = null;
+        this.setBtn(bit, false);
+      };
       btn.addEventListener("pointerdown", down);
       btn.addEventListener("pointerup", up);
-      btn.addEventListener("pointerleave", up);
       btn.addEventListener("pointercancel", up);
     });
   }
