@@ -244,7 +244,7 @@ Hit heights change with stance (stand / crouch / prone / slide / vault / downed)
 
 Default desktop binds:
 
-**WASD** move · **Shift** sprint · **Ctrl** crouch · **P** prone · **Space** jump/vault · **H** emote · **LMB** fire · **RMB** ADS · **R** reload · **T** fire-mode · **N** nade cycle · **1 / 2 / 3** weapons · **E** loot / door / revive · **Q** med · **G** throw · **F** ping · **Z / X / V / B** quick chat · **TAB** roster · **Esc** pause.
+**WASD** move · **Shift** sprint · **Ctrl** crouch · **P** prone · **Space** jump/vault · **H** emote · **LMB** fire · **RMB** ADS · **R** reload · **T** fire-mode · **N** nade cycle · **1 / 2 / 3** weapons · **E** loot / door / revive · **Q** med · **G** throw · **F** ping · **Z / X / V / B** quick chat · **TAB** roster · **Esc** / on-screen **MENU** pause.
 
 All binds remappable in Settings.
 

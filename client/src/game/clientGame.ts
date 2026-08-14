@@ -49,6 +49,8 @@ export class ClientGame {
   private lastFireSnd = 0;
   private map: MapData = TRAINING_RANGE;
   showBoard = false;
+  private wantMusic = "";
+  private musicHold = 0;
 
   constructor(
     private net: NetClient,
@@ -337,16 +339,31 @@ export class ClientGame {
 
   private mixMusic(snap: Snapshot): void {
     const phase = snap.matchPhase;
-    if (phase === "loading") this.audio.setMusic("loading");
-    else if (phase === "intro") this.audio.setMusic("intro");
-    else if (phase === "final") this.audio.setMusic("final");
-    else if (phase === "ended") return;
+    let next: "loading" | "intro" | "final" | "fight" | "contact" | "explore" | "silence" = "explore";
+    if (phase === "loading") next = "loading";
+    else if (phase === "intro") next = "intro";
+    else if (phase === "final") next = "final";
+    else if (phase === "ended") next = "silence";
     else {
       const foes = snap.others.filter((o) => o.team !== snap.you.team && o.alive && !o.dummy);
       const near = foes.some((o) => Math.hypot(o.x - snap.you.x, o.z - snap.you.z) < 28);
       const shots = snap.you.reloading || snap.you.ads;
-      this.audio.setMusic(near && shots ? "fight" : near ? "contact" : "explore");
+      next = near && shots ? "fight" : near ? "contact" : "explore";
     }
+    const now = performance.now();
+    const hard = next === "loading" || next === "intro" || next === "final" || next === "silence";
+    if (hard) {
+      this.wantMusic = next;
+      this.musicHold = now;
+      if (next !== "silence") this.audio.setMusic(next);
+      return;
+    }
+    if (next !== this.wantMusic) {
+      this.wantMusic = next;
+      this.musicHold = now;
+      return;
+    }
+    if (now - this.musicHold >= 1400) this.audio.setMusic(next);
   }
 
   private posOf(id: string): { x: number; z: number } {

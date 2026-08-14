@@ -31,9 +31,16 @@ export class AudioEngine {
   private ambTimer: number | null = null;
   private ambTheme = "";
   private musicState: MusicState = "silence";
-  private musicGainNode: GainNode | null = null;
+  private musicNodes: OscillatorNode[] = [];
+  private musicGains: GainNode[] = [];
+  private ambOsc: OscillatorNode | null = null;
+  private ambGain: GainNode | null = null;
+  private wxSrc: AudioBufferSourceNode | null = null;
+  private wxGain: GainNode | null = null;
   private lastCall = 0;
   private lastUi = 0;
+  private lastFireAt = 0;
+  private lastListenAt = 0;
   private mobile = false;
   private spatial = true;
   private mono = false;
@@ -75,38 +82,63 @@ export class AudioEngine {
     if (!this.ctx) this.build();
     if (this.ctx && this.ctx.state !== "running") await this.ctx.resume();
     this.apply();
+    if (this.ok()) {
+      if (this.musicState !== "silence" && this.musicNodes.length === 0) this.holdPad(this.musicState);
+      if (this.ambTheme && !this.ambOsc) {
+        const [mapId, weather = ""] = this.ambTheme.split(":");
+        this.holdDrone(mapId || "range", weather);
+      }
+    }
+  }
+
+  silence(): void {
+    this.setMusic("silence");
+    this.killAmb();
+    this.ambTheme = "";
   }
 
   apply(): void {
-    if (!this.master) return;
-    this.master.gain.value = this.masterGain;
-    this.buses.music.gain.value = this.musicGain;
-    this.buses.weapons.gain.value = this.weaponGain;
-    this.buses.effects.gain.value = this.sfxGain;
-    this.buses.environment.gain.value = this.envGain;
-    this.buses.character.gain.value = this.charGain;
-    this.buses.voice.gain.value = this.voiceGain;
-    this.buses.ui.gain.value = this.uiGain;
-    this.buses.voiceChat.gain.value = this.chatGain;
+    if (!this.master || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    const set = (g: GainNode, v: number) => {
+      try {
+        g.gain.cancelScheduledValues(t);
+        g.gain.setTargetAtTime(v, t, 0.03);
+      } catch {
+        g.gain.value = v;
+      }
+    };
+    set(this.master, this.masterGain);
+    set(this.buses.music, this.musicGain);
+    set(this.buses.weapons, this.weaponGain);
+    set(this.buses.effects, this.sfxGain);
+    set(this.buses.environment, this.envGain);
+    set(this.buses.character, this.charGain);
+    set(this.buses.voice, this.voiceGain);
+    set(this.buses.ui, this.uiGain);
+    set(this.buses.voiceChat, this.chatGain);
   }
 
   listener(x: number, y: number, z: number, yaw: number): void {
     if (!this.ctx) return;
+    const now = performance.now();
+    if (now - this.lastListenAt < 50) return;
+    this.lastListenAt = now;
     const l = this.ctx.listener;
     const fx = Math.sin(yaw);
     const fz = Math.cos(yaw);
+    const t = this.ctx.currentTime;
     try {
-      l.positionX.value = x;
-      l.positionY.value = y + 1.4;
-      l.positionZ.value = z;
-      l.forwardX.value = fx;
-      l.forwardY.value = 0;
-      l.forwardZ.value = fz;
-      l.upX.value = 0;
-      l.upY.value = 1;
-      l.upZ.value = 0;
+      l.positionX.setValueAtTime(x, t);
+      l.positionY.setValueAtTime(y + 1.4, t);
+      l.positionZ.setValueAtTime(z, t);
+      l.forwardX.setValueAtTime(fx, t);
+      l.forwardY.setValueAtTime(0, t);
+      l.forwardZ.setValueAtTime(fz, t);
+      l.upX.setValueAtTime(0, t);
+      l.upY.setValueAtTime(1, t);
+      l.upZ.setValueAtTime(0, t);
     } catch {
-      // Safari prefix path
       const old = l as AudioListener & { setPosition?: (a: number, b: number, c: number) => void; setOrientation?: (...n: number[]) => void };
       old.setPosition?.(x, y + 1.4, z);
       old.setOrientation?.(fx, 0, fz, 0, 1, 0);
@@ -120,6 +152,9 @@ export class AudioEngine {
 
   fire(id: string, cls: string, x: number, y: number, z: number, dist: number, suppress: boolean, occluded: boolean): void {
     if (!this.ok()) return;
+    const now = performance.now();
+    if (now - this.lastFireAt < 70) return;
+    this.lastFireAt = now;
     if (!this.take(AUDIO_PRIORITY.weapon)) return;
     const v = weaponVoice(id, cls);
     const t = this.ctx!.currentTime;
@@ -244,25 +279,18 @@ export class AudioEngine {
 
   ambience(mapId: string, weather: string): void {
     const key = mapId + ":" + weather;
-    if (this.ambTheme === key) return;
+    if (this.ambTheme === key && this.ambOsc) return;
     this.ambTheme = key;
-    if (this.ambTimer) window.clearInterval(this.ambTimer);
-    if (!this.ctx) return;
-    this.drone(mapId, weather);
-    this.ambTimer = window.setInterval(() => this.drone(mapId, weather), 2400);
+    if (!this.ok()) return;
+    this.holdDrone(mapId, weather);
   }
 
   setMusic(state: MusicState): void {
-    if (this.musicState === state) return;
+    if (this.musicState === state && (state === "silence" || this.musicNodes.length > 0)) return;
     this.musicState = state;
-    if (this.musicTimer) {
-      window.clearInterval(this.musicTimer);
-      this.musicTimer = null;
-    }
-    if (!this.ctx || state === "silence") return;
-    this.bed(state);
-    const period = state === "fight" || state === "final" ? 1800 : state === "menu" ? 3200 : 2600;
-    this.musicTimer = window.setInterval(() => this.bed(state), period);
+    this.killMusic(state === "silence" ? 0.22 : 0.1);
+    if (!this.ok() || state === "silence") return;
+    this.holdPad(state);
   }
 
   menuTheme(on: boolean): void {
@@ -304,52 +332,151 @@ export class AudioEngine {
     if (kind === "found") this.osc("sine", 523, this.ctx!.currentTime + 0.08, 0.16, 0.035, this.buses.ui);
   }
 
-  private bed(state: MusicState): void {
+  private holdPad(state: MusicState): void {
     if (!this.ctx || this.ctx.state !== "running") return;
+    this.killMusic(0.04);
     const t = this.ctx.currentTime;
     const dest = this.buses.music;
     const chords: Record<MusicState, number[]> = {
       silence: [],
-      menu: [110, 146.8, 164.8, 220],
+      menu: [110, 164.8, 220],
       loading: [98, 147],
-      intro: [130.8, 164.8, 196],
-      explore: [98, 123.5, 146.8],
-      contact: [110, 138.6, 164.8],
-      fight: [82.4, 110, 146.8, 196],
-      final: [73.4, 98, 138.6, 185],
-      victory: [130.8, 164.8, 196, 261.6],
-      defeat: [87.3, 110, 130.8],
-      profile: [123.5, 164.8, 196],
+      intro: [130.8, 196],
+      explore: [98, 146.8],
+      contact: [110, 164.8],
+      fight: [82.4, 123.5, 164.8],
+      final: [73.4, 110, 146.8],
+      victory: [130.8, 196, 261.6],
+      defeat: [87.3, 130.8],
+      profile: [123.5, 196],
     };
     const notes = chords[state] || chords.menu;
     const tense = state === "fight" || state === "final";
+    const peak = tense ? 0.02 : 0.016;
     for (let i = 0; i < notes.length; i++) {
       const o = this.ctx.createOscillator();
       const g = this.ctx.createGain();
       const f = this.ctx.createBiquadFilter();
-      o.type = tense && i === 0 ? "sawtooth" : i % 2 ? "triangle" : "sine";
+      o.type = i === 0 && tense ? "triangle" : "sine";
       o.frequency.setValueAtTime(notes[i], t);
       f.type = "lowpass";
-      f.frequency.setValueAtTime(tense ? 900 : 640, t);
+      f.frequency.setValueAtTime(tense ? 720 : 520, t);
       o.connect(f);
       f.connect(g);
       g.connect(dest);
-      g.gain.setValueAtTime(0.001, t);
-      g.gain.linearRampToValueAtTime((tense ? 0.034 : 0.026) - i * 0.004, t + 0.28);
-      g.gain.exponentialRampToValueAtTime(0.001, t + (tense ? 1.7 : 2.6));
-      o.start(t + i * 0.03);
-      o.stop(t + 2.8);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(Math.max(0.006, peak - i * 0.003), t + 0.35);
+      o.start(t);
+      this.musicNodes.push(o);
+      this.musicGains.push(g);
     }
   }
 
-  private drone(mapId: string, weather: string): void {
+  private killMusic(fade: number): void {
+    if (this.musicTimer) {
+      window.clearInterval(this.musicTimer);
+      this.musicTimer = null;
+    }
+    if (!this.ctx) {
+      this.musicNodes = [];
+      this.musicGains = [];
+      return;
+    }
+    const t = this.ctx.currentTime;
+    for (let i = 0; i < this.musicNodes.length; i++) {
+      const g = this.musicGains[i];
+      const o = this.musicNodes[i];
+      try {
+        const cur = Math.max(0.0001, g.gain.value);
+        g.gain.cancelScheduledValues(t);
+        g.gain.setValueAtTime(cur, t);
+        g.gain.linearRampToValueAtTime(0.0001, t + fade);
+        o.stop(t + fade + 0.03);
+      } catch {
+        /* already stopped */
+      }
+    }
+    this.musicNodes = [];
+    this.musicGains = [];
+  }
+
+  private holdDrone(mapId: string, weather: string): void {
     if (!this.ctx || this.ctx.state !== "running") return;
+    this.killAmb();
     const t = this.ctx.currentTime;
     const dest = this.buses.environment;
-    this.osc("sawtooth", mapId === "iron_city" ? 48 : mapId === "red_sands" ? 36 : mapId === "frost_haven" ? 42 : 55, t, 2.2, 0.028, dest);
-    if (weather === "rain" || weather === "blizzard" || weather === "snow") {
-      this.burst(dest, t, 0.4, 0.012);
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    const f = this.ctx.createBiquadFilter();
+    o.type = "sine";
+    o.frequency.setValueAtTime(mapId === "iron_city" ? 52 : mapId === "red_sands" ? 44 : mapId === "frost_haven" ? 48 : 56, t);
+    f.type = "lowpass";
+    f.frequency.value = 180;
+    o.connect(f);
+    f.connect(g);
+    g.connect(dest);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.012, t + 0.6);
+    o.start(t);
+    this.ambOsc = o;
+    this.ambGain = g;
+    if ((weather === "rain" || weather === "blizzard" || weather === "snow") && this.noise) {
+      const src = this.ctx.createBufferSource();
+      const wg = this.ctx.createGain();
+      const bp = this.ctx.createBiquadFilter();
+      src.buffer = this.noise;
+      src.loop = true;
+      bp.type = "bandpass";
+      bp.frequency.value = weather === "blizzard" ? 700 : 1100;
+      src.connect(bp);
+      bp.connect(wg);
+      wg.connect(dest);
+      wg.gain.setValueAtTime(0.0001, t);
+      wg.gain.linearRampToValueAtTime(0.01, t + 0.8);
+      src.start(t);
+      this.wxSrc = src;
+      this.wxGain = wg;
     }
+  }
+
+  private killAmb(): void {
+    if (this.ambTimer) {
+      window.clearInterval(this.ambTimer);
+      this.ambTimer = null;
+    }
+    if (!this.ctx) {
+      this.ambOsc = null;
+      this.ambGain = null;
+      this.wxSrc = null;
+      this.wxGain = null;
+      return;
+    }
+    const t = this.ctx.currentTime;
+    try {
+      if (this.ambGain && this.ambOsc) {
+        const cur = Math.max(0.0001, this.ambGain.gain.value);
+        this.ambGain.gain.cancelScheduledValues(t);
+        this.ambGain.gain.setValueAtTime(cur, t);
+        this.ambGain.gain.linearRampToValueAtTime(0.0001, t + 0.2);
+        this.ambOsc.stop(t + 0.24);
+      }
+    } catch {
+      /* already stopped */
+    }
+    try {
+      if (this.wxGain && this.wxSrc) {
+        this.wxGain.gain.cancelScheduledValues(t);
+        this.wxGain.gain.setValueAtTime(Math.max(0.0001, this.wxGain.gain.value), t);
+        this.wxGain.gain.linearRampToValueAtTime(0.0001, t + 0.2);
+        this.wxSrc.stop(t + 0.24);
+      }
+    } catch {
+      /* already stopped */
+    }
+    this.ambOsc = null;
+    this.ambGain = null;
+    this.wxSrc = null;
+    this.wxGain = null;
   }
 
   private duckTo(mul: number, sec: number): void {

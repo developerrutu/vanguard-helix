@@ -141,6 +141,11 @@ export class InputManager {
   };
 
   sample(dt: number): InputFrame {
+    if (!this.enabled) {
+      this.reset();
+      this.seq++;
+      return { seq: this.seq, dt, moveX: 0, moveY: 0, lookX: 0, lookY: 0, buttons: 0 };
+    }
     this.pollKeyboardMove();
     this.pollGamepad(dt);
     if (this.autoSprint && (Math.abs(this.moveX) > 0.4 || Math.abs(this.moveY) > 0.4)) this.setBtn(BTN.SPRINT, true);

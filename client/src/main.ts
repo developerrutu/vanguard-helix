@@ -114,7 +114,7 @@ async function boot(): Promise<void> {
   ui.setBoot(0.7, t("boot_audio"));
   audio.setMobile(caps.mobile || caps.android);
   audio.onLine((text) => ui.chatLine("SQUAD", text));
-  window.addEventListener("pointerdown", () => void audio.resume(), { once: true });
+  window.addEventListener("pointerdown", () => void audio.resume());
 
   ui.setBoot(0.8, t("boot_auth"));
   const storedName = localStorage.getItem("vanguard.name") || "";
@@ -221,6 +221,8 @@ function wireNet(): void {
     playing = false;
     game?.stop();
     game = null;
+    document.getElementById("btn-menu")?.classList.add("hidden");
+    ui.openPause(false);
     ui.showResult(r);
     const me = r.cards.find((c) => c.id === net.playerId);
     const win = Boolean(me && r.winner !== "none" && me.team === r.winner);
@@ -508,12 +510,31 @@ function wireMenu(): void {
   document.getElementById("btn-invite-end")?.addEventListener("click", () => ui.openSocial(true));
   document.getElementById("btn-resume")!.addEventListener("click", () => {
     ui.openPause(false);
+    ui.openSettings(false);
     input.enabled = true;
   });
   document.getElementById("btn-leave")!.addEventListener("click", () => {
     ui.openPause(false);
+    ui.openSettings(false);
     void leaveMatch();
   });
+  document.getElementById("btn-pause-settings")?.addEventListener("click", () => {
+    audio.beep("ui");
+    ui.openSettings(true);
+  });
+  const menuBtn = document.getElementById("btn-menu");
+  const openMatchMenu = (e?: Event) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (!playing) return;
+    void audio.resume();
+    audio.beep("ui");
+    ui.openPause(true);
+    input.enabled = false;
+    input.reset();
+    document.exitPointerLock?.();
+  };
+  menuBtn?.addEventListener("pointerdown", openMatchMenu);
   document.getElementById("btn-install")!.addEventListener("click", () => pwa.promptInstall());
   document.getElementById("store-tabs")?.querySelectorAll<HTMLElement>("[data-lane]").forEach((b) => {
     b.onclick = () => {
@@ -533,6 +554,10 @@ function wireMenu(): void {
     if (e.code === "Escape") {
       if (!playing) {
         ui.openSettings(ui.settings.classList.contains("hidden"));
+        return;
+      }
+      if (!ui.settings.classList.contains("hidden")) {
+        ui.openSettings(false);
         return;
       }
       const open = ui.pause.classList.contains("hidden");
@@ -566,6 +591,8 @@ async function leaveMatch(): Promise<void> {
   playing = false;
   game?.stop();
   game = null;
+  audio.silence();
+  audio.menuTheme(true);
   ui.showMenu();
   if (profile) ui.setProfile(profile, currency);
   try {

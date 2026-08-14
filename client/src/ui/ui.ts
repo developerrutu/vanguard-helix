@@ -89,6 +89,7 @@ export class UI {
     document.getElementById("store")?.classList.add("hidden");
     document.getElementById("mailbox")?.classList.add("hidden");
     document.getElementById("fault")?.classList.add("hidden");
+    this.pause.classList.add("hidden");
   }
 
   applyI18n(): void {
@@ -103,6 +104,7 @@ export class UI {
     this.touch.classList.add("hidden");
     this.hideFlows();
     this.menu.classList.remove("hidden");
+    document.getElementById("btn-menu")?.classList.add("hidden");
   }
 
   showGame(touch: boolean): void {
@@ -111,6 +113,7 @@ export class UI {
     this.hideFlows();
     this.hud.classList.remove("hidden");
     this.touch.classList.toggle("hidden", !touch);
+    document.getElementById("btn-menu")?.classList.remove("hidden");
     this.hint.textContent = touch
       ? "STICK · LOOK · FIRE · CTRL CROUCH · P PRONE · E LOOT"
       : "WASD · SHIFT SPRINT · CTRL CROUCH · P PRONE · SPACE JUMP · H EMOTE · RMB ADS";
@@ -835,6 +838,7 @@ export class UI {
 
   hideFault(): void {
     document.getElementById("fault")?.classList.add("hidden");
+    this.pause.classList.add("hidden");
   }
 
   openSheet(id: string, open: boolean): void {
