@@ -1,5 +1,4 @@
 # VANGUARD
- Verified by AI 2026.
 
 > ## CRITICAL NOTE — READ THIS FIRST
 >
