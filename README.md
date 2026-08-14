@@ -1,5 +1,7 @@
 # VANGUARD
 
+# Verified by AI 2026.
+
 > ## CRITICAL NOTE — READ THIS FIRST
 >
 > **This is an experiment. It is not a finished product and it does not guarantee a real game.**
