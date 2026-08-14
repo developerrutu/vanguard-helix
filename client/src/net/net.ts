@@ -64,6 +64,7 @@ export class NetClient {
   onIntro: ((m: { mapName: string; mapId?: string; weather?: string; matchNumber: number; duration: number; alpha: { name: string; rank: string; character: string }[]; bravo: { name: string; rank: string; character: string }[] }) => void) | null = null;
   onChat: ((from: string, text: string) => void) | null = null;
   private pingTimer: number | null = null;
+  private pingSent = 0;
   private token = "";
   private name = "";
 
@@ -125,7 +126,8 @@ export class NetClient {
           reconnectMatch: reconnectMatch || this.lastMatchId,
         });
         this.pingTimer = window.setInterval(() => {
-          this.send({ type: MSG.PING, t: performance.now(), rtt: this.rtt });
+          this.pingSent = performance.now();
+          this.send({ type: MSG.PING, t: this.pingSent, rtt: this.rtt });
         }, 1500);
         resolve();
       };
@@ -257,9 +259,12 @@ export class NetClient {
       case MSG.EVENT:
         this.onEvent?.(msg.events);
         break;
-      case MSG.PONG:
-        this.rtt = Math.max(0, performance.now() - msg.t);
+      case MSG.PONG: {
+        const sent = this.pingSent || msg.t;
+        const ms = performance.now() - sent;
+        if (Number.isFinite(ms) && ms >= 0 && ms < 8000) this.rtt = ms;
         break;
+      }
       case MSG.INVENTORY:
         this.onInventory?.(msg.slots);
         break;

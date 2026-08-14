@@ -20,7 +20,7 @@ npm start        # authority serves the site + /api + /ws
 
 `PORT` comes from the host. Do **not** set `HOST=0.0.0.0` on Railway — leave it unset so the process listens on IPv4 and IPv6 (healthchecks use IPv6). `HELIX_ENV=prod`. Data is `.data/` (ephemeral on free tiers unless you add a disk).
 
-Start command: `node server/dist/index.cjs`. The process binds `::` (IPv6 + IPv4) on `PORT`.
+Start command: `node server/dist/index.cjs` (single bundled file, `ws` included). The process binds `::` (IPv6 + IPv4) on `PORT`. `/` and `/health` both return HTTP 200.
 
 **If Railway says Healthcheck failure:** the HTTP probe is the problem, not the game. On your phone:
 

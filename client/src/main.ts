@@ -1,7 +1,7 @@
 import "./styles/main.css";
 import { detectCapabilities, profileFor, type CapReport, type QualityId } from "./boot/capabilities";
 import { loadSettings, saveSettings, resolveQuality, TOUCH_PRESETS, type Settings } from "./boot/settings";
-import { bindDisplayGates } from "./boot/display";
+import { bindDisplayGates, enterPlayDisplay } from "./boot/display";
 import { registerPwa } from "./pwa/pwa";
 import { InputManager } from "./input/input";
 import { AudioEngine } from "./audio/audio";
@@ -64,7 +64,7 @@ async function probeRegions(): Promise<{ id: string; rtt: number }[]> {
     REGIONS.map(async (r) => {
       const t0 = performance.now();
       try {
-        await fetch(`/api/regions/${r.id}/ping`, { cache: "no-store" });
+        await fetch(`/api/regions/${r.id}/ping`, { cache: "no-store", signal: AbortSignal.timeout(2500) });
         out.push({ id: r.id, rtt: performance.now() - t0 });
       } catch {
         out.push({ id: r.id, rtt: 999 });
@@ -295,6 +295,7 @@ function openStart(): void {
 async function beginQueue(mode: "quick" | "ranked" | "bots"): Promise<void> {
   audio.beep("ui");
   await audio.resume();
+  await enterPlayDisplay();
   audio.menuTheme(false);
   lastMode = mode;
   ui.openSheet("start", false);
@@ -336,6 +337,7 @@ function wireMenu(): void {
   document.getElementById("btn-range")!.addEventListener("click", async () => {
     audio.beep("ui");
     await audio.resume();
+    await enterPlayDisplay();
     net.matchmake("range");
   });
   document.getElementById("btn-cancel-search")!.addEventListener("click", () => {
@@ -549,6 +551,7 @@ function enterMatch(): void {
   if (!renderer) return;
   if (game) game.stop();
   audio.menuTheme(false);
+  void enterPlayDisplay();
   game = new ClientGame(net, input, renderer, audio, ui);
   game.fpsCap = settings.fpsCap;
   playing = true;
@@ -632,7 +635,8 @@ function applySettings(next: Settings, persist: boolean): void {
   document.body.classList.toggle("cb-protan", next.colorblind === "protan");
   document.body.classList.toggle("cb-deutan", next.colorblind === "deutan");
   document.body.classList.toggle("cb-tritan", next.colorblind === "tritan");
-  document.body.classList.toggle("left-handed", next.leftHanded);
+  document.body.classList.toggle("left-handed", next.leftHanded || next.touchPreset === "left");
+  document.body.classList.toggle("touch-adv", next.touchPreset === "advanced");
   document.body.classList.toggle("hi-contrast", next.highContrast);
   document.body.classList.toggle("reduce-flash", next.reduceFlash);
   document.documentElement.style.setProperty("--ui-scale", String(next.uiScale));
@@ -641,8 +645,15 @@ function applySettings(next: Settings, persist: boolean): void {
     setLang(next.lang);
     ui.applyI18n();
   }
-  const slots = { ...TOUCH_PRESETS[next.touchPreset], ...next.touch };
-  input.applyTouchLayout(ui.touch, slots);
+  ui.touch.querySelectorAll<HTMLElement>("[data-act]").forEach((el) => {
+    el.style.left = "";
+    el.style.top = "";
+    el.style.right = "";
+    el.style.bottom = "";
+    el.style.transform = "";
+    el.style.opacity = "";
+  });
+  void TOUCH_PRESETS;
 }
 
 async function openBarracks(): Promise<void> {

@@ -105,6 +105,7 @@ export class GameRenderer {
 
     this.useWorld("iron_city", "clear");
     window.addEventListener("resize", () => this.resize());
+    window.visualViewport?.addEventListener("resize", () => this.resize());
     this.resize();
   }
 
@@ -147,8 +148,9 @@ export class GameRenderer {
   }
 
   resize(): void {
-    const w = window.innerWidth;
-    const h = Math.max(1, window.innerHeight);
+    const vv = window.visualViewport;
+    const w = Math.round(vv?.width || window.innerWidth);
+    const h = Math.max(1, Math.round(vv?.height || window.innerHeight));
     this.renderer.setSize(w, h, false);
     const aspect = w / h;
     this.baseFov = aspect > 2 ? 58 : aspect < 1.4 ? 74 : 68;
@@ -621,7 +623,8 @@ export class GameRenderer {
     const hair = HAIR_TONES[p.appearance?.hair ?? 0] || "#1a1a1a";
     const female = (p.bodyType || op.body) === "female";
     const torsoW = female ? 0.34 : 0.4;
-    const mat = (color: string, metal = 0.3) => new THREE.MeshStandardMaterial({ color, roughness: 0.48, metalness: metal });
+    const mat = (color: string, metal = 0.22) =>
+      new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: metal, emissive: color, emissiveIntensity: 0.08 });
     const torso = new THREE.Mesh(new THREE.CapsuleGeometry(torsoW, 0.62, 5, 8), mat(suit, 0.38));
     torso.position.y = 1.12;
     torso.castShadow = true;

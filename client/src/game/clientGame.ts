@@ -246,7 +246,7 @@ export class ClientGame {
         else this.audio.fire(id, weaponById(id).class, you?.x || 0, you?.y || 0, you?.z || 0, 0, false, false);
         this.render.impulse(you?.ads ? 0.045 : 0.08);
       }
-      applyInput(this.predicted, frame, TRAINING_RANGE);
+      applyInput(this.predicted, frame, this.map);
       this.pending.push({ input: frame, body: copyBody(this.predicted) });
       if (this.pending.length > 64) this.pending.shift();
       this.net.sendInput(frame);

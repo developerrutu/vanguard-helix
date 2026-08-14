@@ -29,6 +29,7 @@ html, body {
   margin: 0;
   width: 100%;
   height: 100%;
+  height: 100svh;
   height: 100dvh;
   overflow: hidden;
   background: var(--bg);
@@ -40,7 +41,7 @@ html, body {
   overscroll-behavior: none;
 }
 
-#app, #view { position: fixed; inset: 0; width: 100%; height: 100%; }
+#app, #view { position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh; }
 #view { display: block; z-index: 0; }
 
 .screen, .hud, .touch, .modal { position: fixed; inset: 0; z-index: 2; }
@@ -517,17 +518,35 @@ html, body {
   background: rgba(61, 255, 192, 0.28); border: 1px solid var(--accent);
   transform: translate(-50%, -50%);
 }
-.lookpad { position: absolute; right: 0; top: 0; width: 58%; height: 100%; pointer-events: auto; }
+.lookpad {
+  position: absolute; right: 0; top: 0; width: 50%; height: 56%;
+  pointer-events: auto;
+}
 .actions {
-  position: absolute; right: calc(18px + var(--safe-r)); bottom: calc(18px + var(--safe-b));
-  display: grid; grid-template-columns: repeat(2, 72px); gap: 8px; pointer-events: auto;
+  position: absolute;
+  right: max(10px, var(--safe-r));
+  bottom: max(10px, var(--safe-b));
+  display: grid;
+  grid-template-columns: repeat(2, min(72px, 16vmin));
+  gap: 6px;
+  pointer-events: auto;
+  z-index: 6;
 }
 .act {
-  height: 52px; border: 1px solid var(--line); background: rgba(8, 10, 16, 0.55);
+  height: min(52px, 12vmin);
+  min-height: 40px;
+  border: 1px solid var(--line); background: rgba(8, 10, 16, 0.55);
   color: var(--text); font-family: inherit; font-weight: 700; letter-spacing: 0.08em; font-size: 11px;
 }
 .act.wide { grid-column: span 2; }
-.act.fire { grid-column: span 2; height: 64px; background: rgba(255, 77, 106, 0.22); border-color: var(--danger); }
+.act.fire {
+  grid-column: span 2;
+  height: min(64px, 15vmin);
+  min-height: 48px;
+  background: rgba(255, 77, 106, 0.22);
+  border-color: var(--danger);
+}
+.stick { z-index: 6; }
 
 body.cb-protan { filter: contrast(1.05) saturate(0.85) hue-rotate(-12deg); }
 body.cb-deutan { filter: contrast(1.05) saturate(0.8) hue-rotate(8deg); }
@@ -560,6 +579,13 @@ body.reduce-flash #flashbang { display: none !important; }
   .lede { font-size: 14px; }
   .dossier { transform: scale(0.92); transform-origin: top right; }
   .nav-hex { padding: 8px 10px; }
+  .stick {
+    width: 20vmin;
+    height: 20vmin;
+    left: max(8px, var(--safe-l));
+    bottom: max(8px, var(--safe-b));
+  }
+  .actions { gap: 4px; }
 }
 
 /* 21:9 ultrawide — Hor+ safe column */

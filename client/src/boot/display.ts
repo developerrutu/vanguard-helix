@@ -28,6 +28,12 @@ export async function requestFullscreen(): Promise<void> {
   }
 }
 
+/** Call from a tap (Start / deploy). Android will not fullscreen without a gesture. */
+export async function enterPlayDisplay(): Promise<void> {
+  await requestFullscreen();
+  await requestLandscape();
+}
+
 export function bindDisplayGates(opts: {
   rotateEl: HTMLElement;
   preferFullscreen: () => boolean;

@@ -262,7 +262,6 @@ export class InputManager {
     const knob = root.querySelector("#stick-knob") as HTMLElement;
     const look = root.querySelector("#lookpad") as HTMLElement;
     if (!stick || !knob || !look) return;
-    const radius = 56;
     let stickId: number | null = null;
     let lookId: number | null = null;
     let lookLastX = 0;
@@ -272,6 +271,7 @@ export class InputManager {
       const r = stick.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
+      const radius = Math.max(36, r.width / 2 - 4);
       let dx = x - cx;
       let dy = y - cy;
       const l = Math.hypot(dx, dy);
@@ -280,6 +280,7 @@ export class InputManager {
         dy = (dy / l) * radius;
       }
       knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+      // Screen right = +X = strafe right. Screen up = -Y = forward.
       this.moveX = dx / radius;
       this.moveY = -dy / radius;
       this.touchingStick = true;
