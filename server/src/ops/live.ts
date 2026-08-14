@@ -21,8 +21,7 @@ export interface Ticket {
   text: string;
 }
 
-const here = dirname(fileURLToPath(import.meta.url));
-const logFile = join(here, "../../../../.data/feedback.log");
+const logFile = join(process.env.HELIX_DATA || join(process.cwd(), ".data"), "feedback.log");
 
 export class LiveDesk {
   private tickets: Ticket[] = [];

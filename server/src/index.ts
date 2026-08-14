@@ -45,7 +45,7 @@ import { liveDesk } from "./ops/live";
 import { PUBLIC_DIR, tryStatic } from "./ops/static";
 
 const PORT = Number(process.env.PORT || 8787);
-const HOST = process.env.HOST || "0.0.0.0";
+const HOST = process.env.HOST || "";
 
 const store = new Store();
 const rate = new RateGate();
@@ -97,7 +97,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (url.pathname === "/api/health") {
+  if (url.pathname === "/health" || url.pathname === "/api/health") {
     json(res, 200, {
       ok: true,
       engine: ENGINE_NAME,
@@ -680,10 +680,12 @@ function originAllowed(_origin: string): boolean {
   return true;
 }
 
-server.listen(PORT, HOST, () => {
-  console.log(`[helix] authority ${ENGINE_VERSION} on ${HOST}:${PORT}`);
+function onListen(): void {
+  console.log(`[helix] authority ${ENGINE_VERSION} port ${PORT}${HOST ? " host " + HOST : " (all interfaces)"}`);
   console.log(`[helix] site ${PUBLIC_DIR}`);
-});
+}
+if (HOST) server.listen(PORT, HOST, onListen);
+else server.listen(PORT, onListen);
 
 process.on("SIGINT", () => {
   store.flush();

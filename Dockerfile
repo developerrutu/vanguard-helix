@@ -10,4 +10,4 @@ ENV HOST=0.0.0.0
 ENV HELIX_ENV=prod
 ENV NODE_ENV=production
 EXPOSE 8787
-CMD ["npm", "start"]
+CMD ["node", "server/dist/index.mjs"]

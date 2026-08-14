@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import {
   ACHIEVEMENTS,
   BEGINNER_POOL,
@@ -112,8 +111,7 @@ interface DiskShape {
   matches: MatchResult[];
 }
 
-const here = dirname(fileURLToPath(import.meta.url));
-const dataFile = join(here, "../../../../.data/accounts.json");
+const dataFile = join(process.env.HELIX_DATA || join(process.cwd(), ".data"), "accounts.json");
 
 const CONTACT_NAMES = ["RAVI", "MIRA", "JUN"];
 

@@ -1,11 +1,8 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { dirname } from "node:path";
 import type http from "node:http";
 
-const here = dirname(fileURLToPath(import.meta.url));
-export const PUBLIC_DIR = process.env.HELIX_PUBLIC || join(here, "../../../client/dist");
+export const PUBLIC_DIR = process.env.HELIX_PUBLIC || join(process.cwd(), "client/dist");
 
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",

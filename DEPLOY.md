@@ -18,7 +18,9 @@ npm run build    # Vite client → client/dist
 npm start        # authority serves the site + /api + /ws
 ```
 
-`PORT` comes from the host. `HELIX_ENV=prod`. Data is `.data/` (ephemeral on free tiers unless you add a disk).
+`PORT` comes from the host. Do **not** set `HOST=0.0.0.0` on Railway — leave it unset so the process listens on IPv4 and IPv6 (healthchecks use IPv6). `HELIX_ENV=prod`. Data is `.data/` (ephemeral on free tiers unless you add a disk).
+
+Start command: `node server/dist/index.mjs`. Health: `GET /health` or `GET /api/health`. If a Railway deploy fails on **Network > Healthcheck**, open **Variables** and delete a custom `HOST`, then redeploy.
 
 ## Environments
 

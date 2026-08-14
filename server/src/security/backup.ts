@@ -1,9 +1,7 @@
 import { copyFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const dataDir = join(here, "../../../../.data");
+const dataDir = process.env.HELIX_DATA || join(process.cwd(), ".data");
 const src = join(dataDir, "accounts.json");
 const dir = join(dataDir, "backups");
 
