@@ -372,6 +372,14 @@ const server = http.createServer((req, res) => {
 
   if (tryStatic(req, res, url.pathname)) return;
 
+  if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) {
+    const html =
+      "<!doctype html><meta charset=utf-8><title>VANGUARD</title><body style=\"font-family:sans-serif;background:#07080d;color:#e9eef6;padding:24px\"><p>Helix online. Client bundle missing — rebuild.</p></body>";
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Content-Length": Buffer.byteLength(html) });
+    res.end(html);
+    return;
+  }
+
   json(res, 404, { error: "not_found" });
 });
 
@@ -685,7 +693,14 @@ function onListen(): void {
   console.log(`[helix] site ${PUBLIC_DIR}`);
 }
 if (HOST) server.listen(PORT, HOST, onListen);
-else server.listen(PORT, onListen);
+else server.listen(PORT, "::", onListen);
+
+process.on("uncaughtException", (err) => {
+  console.error("[helix] crash", err);
+});
+process.on("unhandledRejection", (err) => {
+  console.error("[helix] reject", err);
+});
 
 process.on("SIGINT", () => {
   store.flush();

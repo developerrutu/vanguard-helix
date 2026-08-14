@@ -1,1 +1,1 @@
-web: node server/dist/index.mjs
+web: node server/dist/index.cjs

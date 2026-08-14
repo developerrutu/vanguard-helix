@@ -1,6 +1,5 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 export type FlagKind =
   | "speed"
@@ -30,8 +29,7 @@ export interface Flag {
   severity: number;
 }
 
-const here = dirname(fileURLToPath(import.meta.url));
-const logFile = join(here, "../../../../.data/flags.log");
+const logFile = join(process.env.HELIX_DATA || join(process.cwd(), ".data"), "flags.log");
 
 export class FlagLog {
   private recent: Flag[] = [];

@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.mjs --packages=external",
-    "start": "node dist/index.mjs",
+    "build": "npx esbuild src/index.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.cjs",
+    "start": "node dist/index.cjs",
     "start:src": "tsx src/index.ts"
   },
   "dependencies": {

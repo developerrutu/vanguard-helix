@@ -20,7 +20,17 @@ npm start        # authority serves the site + /api + /ws
 
 `PORT` comes from the host. Do **not** set `HOST=0.0.0.0` on Railway — leave it unset so the process listens on IPv4 and IPv6 (healthchecks use IPv6). `HELIX_ENV=prod`. Data is `.data/` (ephemeral on free tiers unless you add a disk).
 
-Start command: `node server/dist/index.mjs`. Health: `GET /health` or `GET /api/health`. If a Railway deploy fails on **Network > Healthcheck**, open **Variables** and delete a custom `HOST`, then redeploy.
+Start command: `node server/dist/index.cjs`. The process binds `::` (IPv6 + IPv4) on `PORT`.
+
+**If Railway says Healthcheck failure:** the HTTP probe is the problem, not the game. On your phone:
+
+1. Open the service → **Settings** (gear)
+2. Find **Healthcheck Path**
+3. **Delete the path** so it is empty (not `/`, not `/health`)
+4. Save / tick the check
+5. Redeploy
+
+Also delete a `HOST` variable if you added one. Leave `PORT` to Railway.
 
 ## Environments
 

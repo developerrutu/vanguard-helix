@@ -13,7 +13,7 @@
     "dev:client": "npm run dev -w @vanguard/client",
     "dev:server": "npm run dev -w @vanguard/server",
     "build": "npm run build -w @vanguard/client && npm run build -w @vanguard/server",
-    "start": "node server/dist/index.mjs",
+    "start": "node server/dist/index.cjs",
     "smoke": "tsx scripts/stack_smoke.mjs && tsx scripts/live_smoke.mjs && tsx scripts/economy_smoke.mjs && tsx scripts/security_smoke.mjs && tsx scripts/audio_smoke.mjs && tsx scripts/ux_smoke.mjs && tsx scripts/social_smoke.mjs && tsx scripts/progress_smoke.mjs && tsx scripts/minds_smoke.mjs",
     "test": "npm run smoke"
   },

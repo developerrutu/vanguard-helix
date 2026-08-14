@@ -1,6 +1,5 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 export type AuditKind =
   | "match_start"
@@ -33,8 +32,7 @@ export interface AuditRow {
   detail: string;
 }
 
-const here = dirname(fileURLToPath(import.meta.url));
-const logFile = join(here, "../../../../.data/audit.log");
+const logFile = join(process.env.HELIX_DATA || join(process.cwd(), ".data"), "audit.log");
 
 export class Audit {
   private recent: AuditRow[] = [];

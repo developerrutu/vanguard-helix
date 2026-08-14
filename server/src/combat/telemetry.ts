@@ -1,6 +1,5 @@
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 interface Row {
   id: string;
@@ -11,8 +10,7 @@ interface Row {
   damage: number;
 }
 
-const here = dirname(fileURLToPath(import.meta.url));
-const file = join(here, "../../../.data/weapon_stats.json");
+const file = join(process.env.HELIX_DATA || join(process.cwd(), ".data"), "weapon_stats.json");
 
 export class WeaponTelemetry {
   private rows = new Map<string, Row>();

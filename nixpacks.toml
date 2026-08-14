@@ -1,2 +1,2 @@
 [start]
-cmd = "node server/dist/index.mjs"
+cmd = "node server/dist/index.cjs"
